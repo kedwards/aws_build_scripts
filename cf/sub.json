@@ -1,0 +1,91 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "AWS CloudFormation Template by LivITY Consulting.",
+  "Parameters" : {
+    "VpcId" : {
+      "Type" : "String"  
+    }
+  },
+  "Resources" : {
+    "PrivateSubnetAZ1" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "AvailabilityZone" : { "Fn::Select" : [ 0, { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] },
+        "CidrBlock" : "192.168.0.0/19",
+        "MapPublicIpOnLaunch" : false,
+        "Tags" : [  { "Key" : "Name", "Value" : "Private Subnet AZ1" } ],
+        "VpcId" :  { "Ref" : "VpcId" }
+      }
+    },
+    "PublicSubnetAZ1" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "AvailabilityZone" : { "Fn::Select" : [ 0, { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] },
+        "CidrBlock" : "192.168.32.0/20",
+        "MapPublicIpOnLaunch" : false,
+        "Tags" : [  { "Key" : "Name", "Value" : "Public Subnet AZ1" } ],
+        "VpcId" :  { "Ref" : "VpcId" }
+      }
+    },
+    "ProtectedSubnetAZ1" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "AvailabilityZone" : { "Fn::Select" : [ 0, { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] },
+        "CidrBlock" : "192.168.48.0/21",
+        "MapPublicIpOnLaunch" : false,
+        "Tags" : [  { "Key" : "Name", "Value" : "Protected Subnet AZ1" } ],
+        "VpcId" :  { "Ref" : "VpcId" }
+      }
+    },
+    "UnusedSubnetAZ1" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "AvailabilityZone" : { "Fn::Select" : [ 0, { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] },
+        "CidrBlock" : "192.168.56.0/21",
+        "MapPublicIpOnLaunch" : false,
+        "Tags" : [  { "Key" : "Name", "Value" : "Unused Subnet AZ1" } ],
+        "VpcId" :  { "Ref" : "VpcId" }
+      }
+    },
+    "PrivateSubnetAZ2" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "AvailabilityZone" : { "Fn::Select" : [ 1, { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] },
+        "CidrBlock" : "192.168.64.0/19",
+        "MapPublicIpOnLaunch" : false,
+        "Tags" : [  { "Key" : "Name", "Value" : "Private Subnet AZ2" } ],
+        "VpcId" :  { "Ref" : "VpcId" }
+      }
+    },
+    "PublicSubnetAZ2" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "AvailabilityZone" : { "Fn::Select" : [ 1, { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] },
+        "CidrBlock" : "192.168.96.0/20",
+        "MapPublicIpOnLaunch" : false,
+        "Tags" : [  { "Key" : "Name", "Value" : "Public Subnet AZ2" } ],
+        "VpcId" :  { "Ref" : "VpcId" }
+      }
+    },
+    "ProtectedSubnetAZ2" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "AvailabilityZone" : { "Fn::Select" : [ 1, { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] },
+        "CidrBlock" : "192.168.112.0/21",
+        "MapPublicIpOnLaunch" : false,
+        "Tags" : [  { "Key" : "Name", "Value" : "Protected Subnet AZ2" } ],
+        "VpcId" :  { "Ref" : "VpcId" }
+      }
+    },
+    "UnusedSubnetAZ2" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "AvailabilityZone" : { "Fn::Select" : [ 1, { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] },
+        "CidrBlock" : "192.168.120.0/21",
+        "MapPublicIpOnLaunch" : false,
+        "Tags" : [  { "Key" : "Name", "Value" : "Unused Subnet AZ2" } ],
+        "VpcId" :  { "Ref" : "VpcId" }
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+"WebServerGroup" : {
+  "Type" : "AWS::AutoScaling::AutoScalingGroup",
+  "Properties" : {
+    "VPCZoneIdentifier": { "Ref" : "PrivateSubnets" },
+    "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
+    "MinSize" : "1",
+    "MaxSize" : "5",
+    "DesiredCapacity" : { "Ref" : "WebServerCapacity" },
+    "LoadBalancerNames" : [ { "Ref" : "ElasticLoadBalancer" } ]
+  },
+  "CreationPolicy" : {
+    "ResourceSignal" : {
+      "Timeout" : "PT15M"
+    }
+  },
+  "UpdatePolicy": {
+    "AutoScalingRollingUpdate": {
+      "MinInstancesInService": "1",
+      "MaxBatchSize": "1",
+      "PauseTime" : "PT15M",
+      "WaitOnResourceSignals": "true"
+    }
+  }
+}

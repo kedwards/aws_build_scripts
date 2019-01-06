@@ -1,0 +1,97 @@
+#!/bin/bash
+ 
+### BEGIN INIT INFO
+# Provides: autoroute53
+# Required-Start:  $network $syslog $named
+# Required-Stop: $network $syslog $named
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# X-Interactive: false
+# Short-Description: Automagically add/remove/update DNS entries in Route53
+### END INIT INFO
+
+# sourced from ~/.aws/credentials
+#export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#export AWS_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxxxxx
+
+PROG=autoroute53
+LOCKFILE=${LOCKFILE-/var/lock/subsys/$PROG}
+
+DOMAIN=kevinedwards.ca
+PROFILE=ke
+RETVAL=0
+TTL=300
+
+AWS_HOST=`curl -s http://169.254.169.254/latest/meta-data/hostname`
+EC2_PUBLIC=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
+LOCAL_HOSTNAME=`curl -s http://169.254.169.254/latest/meta-data/local-hostname | cut -d = -f 2`
+IPV4=`curl -s http://169.254.169.254/latest/meta-data/public-ipv4`
+LOCAL_IPV4_HOST=`curl -s http://169.254.169.254/latest/meta-data/local-ipv4 | tr '.' '-'`
+
+start() {
+    if [[ -n $LOCAL_HOSTNAME ]]; then
+        sudo touch $LOCKFILE
+    
+        # set also the hostname to the running instance
+        echo ${LOCAL_HOSTNAME} | sudo tee /etc/hostname > /dev/null
+        FQDN=${LOCAL_HOSTNAME}.${DOMAIN}
+        sudo hostname ${FQDN}
+        
+        # Update Route53 with a CNAME record pointing the hostname to the EC2 public DNS name
+        # in this way it will resolve correctly to the private ip internally to ec2 and
+        # the public ip externally
+        RESULT=`cli53 rrcreate ${DOMAIN} "${LOCAL_HOSTNAME} ${TTL} CNAME ${EC2_PUBLIC}." --replace`
+        logger "Created Route53 record with the result ${RESULT}"
+
+        # write an MOTD file so that the hostname is displayed on login
+        MESSAGE="\nInstance registered with Route53 as '${FQDN}'\npointing to '${EC2_PUBLIC}'\n\n"
+        logger $MESSAGE
+
+        sudo tee /etc/update-motd.d/40-autoroute53 > /dev/null << EOF
+#!/usr/bin/env bash
+# auto generated on boot by autoroute53
+printf "${MESSAGE}"
+EOF
+        sudo chmod +x /etc/update-motd.d/40-autoroute53
+    
+    # Add fqdn to hosts file
+    sudo tee /etc/hosts > /dev/null << EOF
+# This file is automatically genreated by autoroute53 script
+127.0.1.1 ${AWS_HOST} ip-${LOCAL_IPV4_HOST}
+127.0.0.1 localhost
+${IPV4} ${LOCAL_HOSTNAME}.${DOMAIN} ${HOSTNAME}
+
+# The following lines are desirable for IPv6 capable hosts                                                                                                                                              
+::1 ip6-localhost ip6-loopback                                                                                                                                                                          
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+EOF
+    fi
+}
+
+stop() {
+    # Delete Route53 with a CNAME record pointing to the hostname to the EC2 public DNS name
+    RESULT=`cli53 rrdelete ${DOMAIN} ${LOCAL_HOSTNAME} CNAME`
+    logger "Deleted Route53 record with the result ${RESULT}"
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    reload)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: $0 {start|stopi|reload}"
+        exit 1
+        ;;
+esac
+exit ${RETVAL}

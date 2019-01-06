@@ -1,0 +1,393 @@
+aws> ec2 describe-vpcs
+{
+    "Vpcs": [
+        {
+            "VpcId": "vpc-6f9a340b",
+            "InstanceTenancy": "default",
+            "Tags": [
+                {
+                    "Value": "default-vpc",
+                    "Key": "Name"
+                }
+            ],
+            "State": "available",
+            "DhcpOptionsId": "dopt-cbd12bae",
+            "CidrBlock": "172.31.0.0/16",
+            "IsDefault": true
+        }
+    ]
+}
+
+aws> ec2 create-vpc --cidr-block 10.0.0.0/16
+{
+    "Vpc": {
+        "InstanceTenancy": "default",
+        "State": "pending",
+        "VpcId": "vpc-f0bff594",
+        "CidrBlock": "10.0.0.0/16",
+        "DhcpOptionsId": "dopt-cbd12bae"
+    }
+}
+
+aws> ec2 create-tags --resources vpc-f0bff594 --tags Key=Name,Value=knc-vpc
+
+aws> ec2 describe-vpcs
+{
+    "Vpcs": [
+        {
+            "VpcId": "vpc-6f9a340b",
+            "InstanceTenancy": "default",
+            "Tags": [
+                {
+                    "Value": "default-vpc",
+                    "Key": "Name"
+                }
+            ],
+            "State": "available",
+            "DhcpOptionsId": "dopt-cbd12bae",
+            "CidrBlock": "172.31.0.0/16",
+            "IsDefault": true
+        },
+        {
+            "VpcId": "vpc-f0bff594",
+            "InstanceTenancy": "default",
+            "Tags": [
+                {
+                    "Value": "knc-vpc",
+                    "Key": "Name"
+                }
+            ],
+            "State": "available",
+            "DhcpOptionsId": "dopt-cbd12bae",
+            "CidrBlock": "10.0.0.0/16",
+            "IsDefault": false
+        }
+    ]
+}
+
+aws> ec2 describe-internet-gateways
+{
+    "InternetGateways": [
+        {
+            "Tags": [
+                {
+                    "Value": "igw_default_vpc",
+                    "Key": "Name"
+                }
+            ],
+            "InternetGatewayId": "igw-88bdb2ed",
+            "Attachments": [
+                {
+                    "State": "available",
+                    "VpcId": "vpc-6f9a340b"
+                }
+            ]
+        }
+    ]
+}
+
+aws> ec2 create-internet-gateway 
+{
+    "InternetGateway": {
+        "Tags": [], 
+        "InternetGatewayId": "igw-6992410d", 
+        "Attachments": []
+    }
+}
+
+aws> ec2 create-tags --resources igw-6992410d --tags Key=Name,Value=knc-vpc-igw
+
+aws> ec2 attach-internet-gateway --vpc-id vpc-f0bff594 --internet-gateway-id igw-6992410d
+
+aws> ec2 describe-internet-gateways
+{
+    "InternetGateways": [
+        {
+            "Tags": [
+                {
+                    "Value": "igw_default_vpc", 
+                    "Key": "Name"
+                }
+            ], 
+            "InternetGatewayId": "igw-88bdb2ed", 
+            "Attachments": [
+                {
+                    "State": "available", 
+                    "VpcId": "vpc-6f9a340b"
+                }
+            ]
+        }, 
+        {
+            "Tags": [
+                {
+                    "Value": "knc-vpc-igw", 
+                    "Key": "Name"
+                }
+            ], 
+            "InternetGatewayId": "igw-6992410d", 
+            "Attachments": [
+                {
+                    "State": "available", 
+                    "VpcId": "vpc-f0bff594"
+                }
+            ]
+        }
+    ]
+}
+
+aws> ec2 describe-subnets --query 'Subnets[?VpcId==`vpc-f0bff594`]' 
+[]
+
+aws> ec2 create-subnet --vpc-id vpc-f0bff594 --cidr-block 10.0.1.0/24 --availability-zone us-east-1a
+{
+    "Subnet": {
+        "VpcId": "vpc-f0bff594", 
+        "CidrBlock": "10.0.1.0/24", 
+        "State": "pending", 
+        "AvailabilityZone": "us-east-1a", 
+        "SubnetId": "subnet-36d6191c", 
+        "AvailableIpAddressCount": 251
+    }
+}
+
+aws> ec2 create-tags --resources subnet-36d6191c --tags Key=Name,Value=knc-vpc-sub-pub
+
+aws> ec2 create-subnet --vpc-id vpc-f0bff594 --cidr-block 10.0.2.0/24 --availability-zone us-east-1b 
+{
+    "Subnet": {
+        "VpcId": "vpc-f0bff594", 
+        "CidrBlock": "10.0.2.0/24", 
+        "State": "pending", 
+        "AvailabilityZone": "us-east-1b", 
+        "SubnetId": "subnet-21239d57", 
+        "AvailableIpAddressCount": 251
+    }
+}
+
+aws> ec2 create-tags --resources subnet-21239d57 --tags Key=Name,Value=knc-vpc-sub-pub
+
+aws> ec2 describe-subnets --query 'Subnets[?VpcId==`vpc-f0bff594`]' 
+[
+    {
+        "VpcId": "vpc-f0bff594", 
+        "Tags": [
+            {
+                "Value": "knc-vpc-sub-priv", 
+                "Key": "Name"
+            }
+        ], 
+        "CidrBlock": "10.0.2.0/24", 
+        "MapPublicIpOnLaunch": false, 
+        "DefaultForAz": false, 
+        "State": "available", 
+        "AvailabilityZone": "us-east-1b", 
+        "SubnetId": "subnet-21239d57", 
+        "AvailableIpAddressCount": 251
+    }, 
+    {
+        "VpcId": "vpc-f0bff594", 
+        "Tags": [
+            {
+                "Value": "knc-vpc-sub-pub", 
+                "Key": "Name"
+            }
+        ], 
+        "CidrBlock": "10.0.1.0/24", 
+        "MapPublicIpOnLaunch": false, 
+        "DefaultForAz": false, 
+        "State": "available", 
+        "AvailabilityZone": "us-east-1a", 
+        "SubnetId": "subnet-36d6191c", 
+        "AvailableIpAddressCount": 251
+    }
+]
+
+aws> ec2 describe-route-tables --query 'RouteTables[?VpcId==`vpc-f0bff594`]'
+[
+    {
+        "Associations": [
+            {
+                "RouteTableAssociationId": "rtbassoc-ac6cf5cb",
+                "Main": true,
+                "RouteTableId": "rtb-1ed1c07a"
+            }
+        ],
+        "RouteTableId": "rtb-1ed1c07a",
+        "VpcId": "vpc-f0bff594",
+        "PropagatingVgws": [],
+        "Tags": [],
+        "Routes": [
+            {
+                "GatewayId": "local",
+                "DestinationCidrBlock": "10.0.0.0/16",
+                "State": "active",
+                "Origin": "CreateRouteTable"
+            }
+        ]
+    }
+]
+
+aws> ec2 create-route-table --vpc-id vpc-f0bff594
+{
+    "RouteTable": {
+        "Associations": [],
+        "RouteTableId": "",
+        "VpcId": "vpc-f0bff594",
+        "PropagatingVgws": [],
+        "Tags": [],rtb-35b6a651
+        "Routes": [
+            {
+                "GatewayId": "local",
+                "DestinationCidrBlock": "10.0.0.0/16",
+                "State": "active",
+                "Origin": "CreateRouteTable"
+            }
+        ]
+    }
+}
+
+aws> ec2 create-tags --resources rtb-35b6a651 --tags Key=Name,Value=knc-vpc-rtb-igw
+
+aws> ec2 associate-route-table --subnet-id subnet-36d6191c --route-table-id rtb-35b6a651
+{
+    "AssociationId": "rtbassoc-5c6ff43b"
+}
+
+aws> ec2 create-route --route-table-id rtb-35b6a651 --destination-cidr-block 0.0.0.0/0 --gateway-id igw-6992410d
+{
+    "Return": true
+}
+
+aws> ec2 create-security-group --group-name knc-dmz --description "DMZ Security Group" --vpc-id vpc-f0bff594
+{
+    "GroupId": "sg-ad362cd4"
+}
+
+aws> ec2 authorize-security-group-ingress --group-id sg-ad362cd4 --protocol tcp --port 22 --cidr 0.0.0.0./0ec2 run-instances --image-id ami-8b9a63e0 --count 1 --instance-type t2.micro --key-name knc-course-2 --security-group-ids sg-ad362cd4 --subnet-id subnet-36d6191c --associate-public-ip-address --monitoring Enabled=false --iam-instance-profile ARrnarn:aws:iam::751275815328:role/S3_Access,Name=S3_Access
+
+aws> ec2 create-key-pair --key-name knc-course-2 --query 'KeyMaterial' --output text > knc-course-2.pem
+
+
+aws> ec2 run-instances --image-id ami-8b9a63e0 --count 1 --instance-type t2.micro --key-name knc-course --security-group-id
+s sg-ad362cd4 --subnet-id subnet-36d6191c --associate-public-ip-address --monitoring Enabled=false --iam-instance-profile Nam
+e=S3_Access
+{
+    "Reservations": [
+        {
+            "OwnerId": "751275815328",
+            "ReservationId": "r-d368657b",
+            "Groups": [],
+            "Instances": [
+                {
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "PublicDnsName": "",
+                    "State": {
+                        "Code": 16,
+                        "Name": "running"
+                    },
+                    "EbsOptimized": false,
+                    "LaunchTime": "2016-02-10T14:55:31.000Z",
+                    "PublicIpAddress": "54.164.112.74",
+                    "PrivateIpAddress": "10.0.1.42",
+                    "ProductCodes": [
+                        {
+                            "ProductCodeId": "3f8t6t8fp5m9xx18yzwriozxi",
+                            "ProductCodeType": "marketplace"
+                        }
+                    ],
+                    "VpcId": "vpc-f0bff594",
+                    "StateTransitionReason": "",
+                    "InstanceId": "i-dc7c0b5c",
+                    "ImageId": "ami-8b9a63e0",
+                    "PrivateDnsName": "ip-10-0-1-42.ec2.internal",
+                    "KeyName": "knc-course-2",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "knc-dmz",
+                            "GroupId": "sg-ad362cd4"
+                        }
+                    ],
+                    "ClientToken": "",
+                    "SubnetId": "subnet-36d6191c",
+                    "InstanceType": "t2.micro",
+                    "NetworkInterfaces": [
+                        {
+                            "Status": "in-use",
+                            "MacAddress": "12:8a:ef:10:3b:79",
+                            "SourceDestCheck": true,
+                            "VpcId": "vpc-f0bff594",
+                            "Description": "",
+                            "Association": {
+                                "PublicIp": "54.164.112.74",
+                                "PublicDnsName": "",
+                                "IpOwnerId": "amazon"
+                            },
+                             "PrivateIpAddresses": [
+                                {
+                                    "Association": {
+                                        "PublicIp": "54.164.112.74",
+                                        "PublicDnsName": "",
+                                        "IpOwnerId": "amazon"
+                                    },
+                                    "Primary": true,
+                                    "PrivateIpAddress": "10.0.1.42"
+                                }
+                            ],
+                            "Attachment": {
+                                "Status": "attached",
+                                "DeviceIndex": 0,
+                                "DeleteOnTermination": true,
+                                "AttachmentId": "eni-attach-7c3a689d",
+                                "AttachTime": "2016-02-10T14:55:31.000Z"
+                            },
+                            "Groups": [
+                                {
+                                    "GroupName": "knc-dmz",
+                                    "GroupId": "sg-ad362cd4"
+                                }
+                            ],
+                            "SubnetId": "subnet-36d6191c",
+                            "OwnerId": "751275815328",
+                            "PrivateIpAddress": "10.0.1.42"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "Placement": {
+                        "Tenancy": "default",
+                        "GroupName": "",
+                        "AvailabilityZone": "us-east-1a"
+                    },
+                    "Hypervisor": "xen",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/xvda",
+                            "Ebs": {
+                                "Status": "attached",
+                                "DeleteOnTermination": true,
+                                "VolumeId": "vol-f105812e",
+                                "AttachTime": "2016-02-10T14:55:35.000Z"
+                            }
+                        }
+                    ],
+                    "Architecture": "x86_64",
+                    "RootDeviceType": "ebs",
+                    "IamInstanceProfile": {
+                        "Id": "AIPAIWXTZ5LPACHPCP7ZA",
+                        "Arn": "arn:aws:iam::751275815328:instance-profile/S3_Access"
+                    },
+                    "RootDeviceName": "/dev/xvda",
+                    "VirtualizationType": "hvm",
+                    "AmiLaunchIndex": 0
+                }
+            ]
+        }
+    ]
+}
+
+aws> ec2 describe-instances --output text --query 'Reservations[*].Instances[*].{IP:NetworkInterfaces[0].Association.PublicIp,KEY:KeyName}'
+54.164.112.74   knc-course-2
+
+
+

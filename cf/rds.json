@@ -1,0 +1,15 @@
+"DBInstance" : {
+  "Type": "AWS::RDS::DBInstance",
+  "Properties": {
+    "DBName"            : { "Ref" : "DBName" },
+    "DBSubnetGroupName" : { "Ref" : "DBSubnetGroup" },
+    "Engine"            : "MySQL",
+    "MultiAZ"           : { "Ref": "MultiAZDatabase" },
+    "MasterUsername"    : { "Ref" : "DBUser" },
+    "MasterUserPassword": { "Ref" : "DBPassword" },
+    "DBInstanceClass"   : { "Ref" : "DBClass" },
+    "AllocatedStorage"  : { "Ref" : "DBAllocatedStorage" },
+    "VPCSecurityGroups" : [{ "Ref" : "DBEC2SecurityGroup" }]
+  }
+}
+}

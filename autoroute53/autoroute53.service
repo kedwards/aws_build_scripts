@@ -1,0 +1,16 @@
+[Unit]
+
+Description=Autoroute53 is a script to automagically add server hostname into the Route53 DNS system
+After=network.target syslog.target
+
+[Service]
+Type=forking
+ExecStart=/etc/init.d/autoroute53 start
+ExecStop=/etc/init.d/autoroute53 stop
+ExecReload=/etc/init.d/autoroute53 reload
+User=admin
+Group=admin
+RemainAfterExit=yes                                                                                                                                                                                 
+
+[Install]
+WantedBy=multi-user.target

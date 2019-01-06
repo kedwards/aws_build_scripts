@@ -1,0 +1,12 @@
+[Unit]
+Description=Dropbox is a filesyncing sevice provided by dropbox.com.
+After=network.target syslog.target
+                                                                                                                                                                      
+[Service]
+Type=forking
+ExecStart=/etc/init.d/dropbox start
+ExecStop=/etc/init.d/dropbox stop
+ExecReload=/etc/init.d/dropbox reload
+                                                                                                                                                                                                        
+[Install]
+WantedBy=multi-user.target

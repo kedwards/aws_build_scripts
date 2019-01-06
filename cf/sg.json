@@ -1,0 +1,13 @@
+"InstanceSecurityGroup": {
+  "Type": "AWS::EC2::SecurityGroup",
+  "Properties": {
+    "GroupDescription": "Enable inbound network access access to EC2 instance.",
+    "VpcId": { "Ref": "VPCID" },
+    "SecurityGroupIngress": [
+      {"ToPort": "80", "IpProtocol": "tcp", "SourceSecurityGroupId": {"Ref": "ELBSecurityGroup"}, "FromPort": "80"}
+    ],
+    "Tags" : [
+      { "Key": "Name", "Value": { "Fn::Join" : ["", [{ "Ref" : "AWS::StackName" }, "EC2SecurityGrp"]] } }
+    ]
+  }
+},
